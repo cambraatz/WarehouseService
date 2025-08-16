@@ -1,0 +1,8 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:52379",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "C:\\Users\\camer\\Desktop\\Apps\\WarehouseService\\WarehouseService.Server\\..\\warehouseservice.client",
+"MaxTimeoutInSeconds": "120"
+}
+}

@@ -1,0 +1,19 @@
+.landing_window_footer {
+    margin: 0 4%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.footer_text {
+    font-size: 0.65em;
+}
+
+/*.landing_window_footer {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 96%;
+    margin: 0 4% 0 0;
+    position: fixed;
+    bottom: 0;
+    background-color: #fff;
+}*/

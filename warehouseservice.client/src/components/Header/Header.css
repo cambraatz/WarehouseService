@@ -1,0 +1,139 @@
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: 1.1em;
+    margin: 1em 0;
+}
+
+h4 {
+    font-size: 0.75em;
+    margin: 0.75em 0;
+}
+
+.hidden {
+    display: none;
+}
+
+.header {
+    margin: 0 0 2%;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 998;
+    transition: height 0.3s ease;
+}
+
+.company_title {
+    display: flex;
+    flex-direction: row;
+    margin: 0 0 2% 4%;
+    overflow: hidden;
+    opacity: 1;
+    height: auto;
+    transition: opacity 0.3s ease-in-out, height 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+}
+
+    .company_title h4 {
+        margin: 0 8px 0 0;
+    }
+
+.company_list_title {
+    display: flex;
+    align-items: start;
+    text-align: left;
+    font-size: 0.75em;
+}
+
+.sticky_header {
+    width: 100%;
+}
+
+    .sticky_header div {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sticky_header div h1,
+    .sticky_header div h2 {
+        margin: 0 0 2% 4%;
+    }
+
+.module_title {
+    overflow: hidden;
+    opacity: 1;
+    height: auto;
+    transition: opacity 0.3s ease-in-out, height 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+}
+
+header h1, header h2, header h3, header h4, header h5 {
+    margin: 1% 4%;
+    display: flex;
+    align-items: start;
+}
+
+.buffer {
+    height: 20px;
+    background-color: white;
+    transition: height 0.3s ease;
+}
+
+.buffer.collapsed-buffer {
+    height: 10px;
+}
+
+.header.collapsed-header .company_title,
+.header.collapsed-header .module_title {
+    opacity: 0;
+    height: 0;
+    margin-bottom: 0;
+}
+
+#collapse_toggle_button {
+    cursor: pointer;
+    width: 80px;
+    height: 1em;
+    padding-bottom: 2px;
+    font-size: x-small;
+    background-color:#e0eaf3;
+    border: 1px solid gray;
+    border-bottom: 0;
+    border-radius: 5px 5px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    left: calc(50% - 40px);
+    bottom: 0;
+    z-index: 10;
+    transition: all 2s ease-in-out;
+}
+
+#collapse_toggle_button img {
+    width: 25%;
+    padding-top: 2px;
+}
+
+@media only screen and (min-width: 630px) {
+    .header {
+        margin: 0 0 1%;
+    }
+
+    .company_title {
+        justify-content: start;
+        margin: 0 0 1% 4%;
+    }
+
+    #widgetHeader {
+        margin: 4% 20% 0;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    #widgetHeader {
+        margin: 6% 20% 0 20%;
+    }
+}

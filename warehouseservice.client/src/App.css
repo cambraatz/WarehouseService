@@ -1,0 +1,52 @@
+﻿:root {
+    --primary-color: #5A89BB;
+    --action-color: #e0eaf3;
+    --text-color: #353535;
+    --maxWidgetWidth: 800px;
+    --maxTableWidth: 1400px;
+}
+
+#root {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+th, td {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.App {
+    color: #353535;
+    background-color: white;
+    text-align: center;
+    font-family: 'Verdana', Verdana, Geneva, Tahoma, sans-serif;
+    width: 100%;
+}
+
+.weak {
+    font-weight: lighter;
+    margin: 0;
+}
+
+body {
+    display: block;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+} 
+
+html {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+button {
+    background-color: rgb(240, 240, 240);
+    border-color: rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
+    border-width: 1px;
+    border-radius: 2px;
+}
