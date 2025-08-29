@@ -6,7 +6,7 @@ import {
     Return
 } from "../../utils/api/sessions";
 
-import { useAppContext } from "../../hooks/useAppContext";
+import { useAppContext } from "../../contexts/AppContext";
 import { usePopup } from "../../hooks/usePopup";
 import { useNavigate } from "react-router-dom";
 

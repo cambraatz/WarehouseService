@@ -26,42 +26,10 @@
     pointer-events: auto; /* Enable clicks when visible */
 }
 
-/* Styles for the inner popup content box */
-.popupUnload {
-    margin: 30% auto; /* Good for centering in flex container */
-    width: 40%;
-    padding: 5px 20px;
-    background: #fff;
-    border-radius: 5px;
-    position: relative; /* For the close button positioning */
-    /* Add initial state for the inner box animation */
-    transform: scale(0.9); /* Start slightly smaller */
-    opacity: 0; /* Start invisible */
-    transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out; /* Animate these properties */
-}
-
-.popupUnload .close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    transition: all 200ms;
-    font-size: 30px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-}
-
-.popupUnload h1 {
-    display: flex;
-    flex-direction: row-reverse;
-    margin: 0;
-    margin-block-start: .5em;
-    margin-block-end: .25em;
-    margin-inline-start: 0;
-    margin-inline-end: 15px;
-}
-
-.overlay.overlay-visible .popupUnload {
+.overlay.overlay-visible .popupUnload,
+.overlay.overlay-visible .popupUnloadSelection,
+.overlay.overlay-visible .popupSuccess,
+.overlay.overlay-visible .popupFail {
     transform: scale(1);
     opacity: 1;
 }
@@ -91,431 +59,159 @@
     width: 50%;
     height: 2em;
 }
-#barcode_scan_image {
-    height: 25%;
-    width: 25%;
+
+#barcode_input:disabled {
+    background-color: white;
+    color:#333;
 }
-/*
-.popupSignature {
+
+#barcode_scan_image,
+#success_image,
+#fail_image {
+    height: 30%;
+    width: 30%;
+}
+
+.unload_button_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.unload_button_div button {
+    height: 2em;
+    width: 75%;
+    margin-top: 0.5em;;
+}
+
+/* Styles for the inner popup content box */
+
+.popupUnload .close,
+.popupUnloadSelection .close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+}
+
+#popupExit:hover {
+    cursor: pointer;
+}
+
+.popupUnload h1,
+.popupUnloadSelection h1 {
+    display: flex;
+    flex-direction: row-reverse;
+    margin: 0;
+    margin-block-start: .5em;
+    margin-block-end: .25em;
+    margin-inline-start: 0;
+    margin-inline-end: 15px;
+}
+
+.popupUnload {
+    margin: 30% auto; /* Good for centering in flex container */
+    width: 40%;
+    max-width: 375px;
     padding: 5px 20px;
     background: #fff;
-    border-radius: 8px;
-    transition: all 1s ease-in-out;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-    max-width: 90vw;
-    max-height: 90vh;
-    width: 80%;
-    overflow: auto;
-}
-
-.popupSignature .close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    transition: all 200ms;
-    font-size: 30px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-}
-
-.popupGraphic {
-    margin: auto;
-    width: 50%;
-    padding: 15px 20px;
-    background: #fff;
     border-radius: 5px;
-    position: relative;
-
-    
-    transform: scale(0.9);
-    opacity: 0;
-    transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out;
-    max-width: 250px;
+    position: relative; /* For the close button positioning */
+    /* Add initial state for the inner box animation */
+    transform: scale(0.9); /* Start slightly smaller */
+    opacity: 0; /* Start invisible */
+    transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out; /* Animate these properties */
 }
 
-.popupSessionConflict {
-    margin: auto;
+.popupUnloadSelection {
+    margin: 20% auto;
     width: 60%;
-    padding: 15px 20px;
+    max-width: 450px;
+    padding: 5px 20px 20px;
     background: #fff;
     border-radius: 5px;
-    position: relative;
-
-    transform: scale(0.9);
-    opacity: 0;
-    transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out;
-    max-width: 350px;
-}
-
-.popupDeliveryManager,
-.popupCheckbox {
-    margin: auto;
-    width: 80%;
-    padding: 15px 20px;
-    background: #fff;
-    border-radius: 5px;
-    position: relative;
-
     transform: scale(0.9);
     opacity: 0;
     transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out;
 }
-.popupDeliveryManager.close,
-.popupCheckbox.close,
-.popupSessionConflict.close {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    transition: all 200ms;
-    font-size: 30px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-}
 
-#popupEditWindow, 
-#popupAddWindow {
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.75s ease-in-out;
-}
-
-.overlay.overlay-visible .popupLogin,
-.overlay.overlay-visible .popupDeliveryManager,
-.overlay.overlay-visible .popupCheckbox,
-.overlay.overlay-visible .popupGraphic,
-.overlay.overlay-visible .popupSessionConflict {
-    transform: scale(1);
-    opacity: 1;
-}
-
-.popupLogin, .popup {
-    margin: auto;
+.popupSuccess,
+.popupFail {
+    margin: 20% auto;
     width: 60%;
-    padding: 15px 20px;
+    max-width: 450px;
+    padding: 20px;
     background: #fff;
     border-radius: 5px;
-    position: relative;
-
     transform: scale(0.9);
     opacity: 0;
     transition: transform 0.75s ease-in-out, opacity 0.75s ease-in-out;
 }
 
-    .popupLogin .close, .popupLogin .close_add, .popupLogin .edit_add {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-        transition: all 200ms;
-        font-size: 30px;
-        font-weight: bold;
-        text-decoration: none;
-        color: #333;
-    }
-
-    .popupLogin .content {
-        max-height: 30%;
-        overflow: auto;
-    }
-
-    .popupLogin h1 {
-        display: flex;
-        flex-direction: row-reverse;
-        margin: 0;
-        margin-block-start: 0;
-        margin-block-end: 0.25em;
-        margin-inline-start: 0;
-        margin-inline-end: 15px;
-    }
-
-    .popupLogin p {
-        margin: 0;
-        margin-block-start: 0;
-        margin-block-end: 0.75em;
-        margin-inline-start: 0;
-        margin-inline-end: 0;
-    }
-
-    .popupLogin label {
-        font-size: medium;
-    }
-
-.popupContent {
+.popup_unload_selection,
+.popup_selection_success,
+.popup_selection_fail {
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-.popupContent div {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 1em;
-}
-.popupContent p {
-    margin-block: 2em;
-}
-
-.popupContent input, .popupContent label {
-    width: 80%;
-    text-align: start;
-}
-
-#popupLoginWindow {
-    transition: all 0.75s ease-in-out;
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.input_wrapper {
-    position: relative;
-}
-
-.company-name-error {
-    color: red;
-    font-size: 0.85em;
-    margin-top: 5px;
-}
-
-.aria_fail_flag {
-    width: auto !important;
-    overflow: visible;
-    position: absolute;
-    top: 110%;
-    left: auto;
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    padding: 10px 4px;
-    white-space: nowrap;
-    z-index: 10;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.2s, visibility 0.2s;
-    pointer-events: none;
-}
-
-    .aria_fail_flag::before {
-        content: "";
-        position: absolute;
-        top: -18px;
-        left: 20%;
-        transform: translateX(-50%);
-        border-width: 10px;
-        border-style: solid;
-        border-color: transparent transparent #f8d7da transparent;
-        z-index: 11;
-    }
-
-    .aria_fail_flag.visible {
-        visibility: visible;
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .aria_fail_flag p {
-        margin: 0;
-        font-size: small;
-    }
-
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        padding: 0;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        border: 0;
-    }
-
-.cb_table {
-    width: 100%;
     margin: 0;
+    border: 1px solid black;
+    border-radius: 5px;
 }
 
-.cb_col1 {
-    width: 12%;
-}
-.cb_col2 {
-    width: 10%;
-}
-.cb_col3 {
-    width: 32%;
-}
-.cb_col4 {
-    width: 38%;
-}
-
-.delivered_items {
-    color: #00000085;
-}
-
-.dl_table_div {
-    flex-direction: column;
-}
-
-.fixed_tbody table {
-    width: 100%;
-    border: none;
-    border-bottom: none;
-    border-top: 1px solid black;
-    border-right: 1px solid black;
-    border-left: 1px solid black;
-    border-radius: 5px 5px 0 0;
-}
-
-.dl_table_header {
-    border: none;
-}
-
-.dl_table_header th {
-    border: none;
-    box-shadow: none;
-    background: transparent;
-}
-
-.title_primary .title {
-    font-size: small;
-    padding: 0.5em 0;
-}
-
-.title_secondary .title {
-    font-size: small;
-    padding: 0 0 0.5em;
-}
-
-.checkbox-container {
-    display: inline-block;
-    position: relative;
-    cursor: pointer;
-    margin-bottom: 0;
-  }
-  
-  .checkbox-container input {
-    display: none;
-  }
-  
-  .custom-checkmark {
-    width: 15px;
-    height: 15px;
-    background-color: white;
-    border: 1px solid #555;
-    display: inline-block;
-    border-radius: 4px;
-    position: relative;
-  }
-  
-  .checkbox-container input:checked + .custom-checkmark::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 1px;
-    width: 4px;
-    height: 8px;
-    border: solid #5A89BB;
-    border-width: 0 3px 3px 0;
-    transform: rotate(45deg);
-  }
-
-.scrollable_tbody {
-    max-height: 60vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-.scrollable_tbody table {
-    width: 100%;
-    border: none;
-    border-bottom: 1px solid black;
-    border-top: none;
-    border-right: 1px solid black;
-    border-left: 1px solid black;
-    border-radius: 0 0 5px 5px;
-}
-
-#dl_button_div {
-    gap: 1em;
+.popup_unload_selection_header,
+.popup_selection_success_header,
+.popup_selection_fail_header {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom: 1px solid black;
 }
 
-.dl_popup_button {
-    min-height: 3em;
-    max-width: 300px;
-    margin: 3% 0 2%;
-    width: 40%;
+.popup_selection_success_header {
+    background-color: var(--success-primary-color);
 }
 
-.popup_button {
-    min-height: 3em;
-    width: 60%;
-    max-width: 300px;
+.popup_selection_fail_header {
+    background-color: var(--fail-primary-color);
 }
 
-@media only screen and (min-width: 630px) {
-    .popupLogin {
-        width: 40%;
-    }
-
-    .aria_fail_flag p {
-        font-size: smaller;
-    }
-
-    .cb_col1 {
-        width: 8%;
-    }
-    .cb_col2 {
-        width: 8%;
-    }
-    .cb_col3 {
-        width: 26%;
-    }
-    .cb_col4 {
-        width: 28%;
-    }
-    .cb_col5 {
-        width: 10%;
-    }
-    .cb_col6 {
-        width: 12%;
-    }
-
-    .popup_button {
-        width: 40%;
-    }
+.popup_unload_selection_header h5,
+.popup_selection_success_header h5,
+.popup_selection_fail_header h5 {
+    margin: 1em 0 0.5em;
 }
 
-@media only screen and (min-width: 900px) {
-    .popupLogin {
-        width: 30%;
-    }
+.popup_unload_selection_header h4,
+.popup_selection_success_header h4,
+.popup_selection_fail_header h4 {
+    margin: 0 0 1em;
 }
 
-@media only screen and (min-width: 1200px) {
-    .popupLogin {
-        width: 25%;
-    }
-
-    .popupSignature {
-        width: 70%;
-    }
+.popup_unload_selection_double_col,
+.popup_selection_success_double_col,
+.popup_selection_fail_double_col {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 0 2%;
 }
 
-@media only screen and (min-width: 1600px) {        
-    .popupLogin {
-        margin: 20% auto;
-        width: 15%;
-        gap: 2%;
-    }
-}*/
+.popup_unload_selection_body,
+.popup_selection_success_body,
+.popup_selection_fail_body {
+    padding-top: 1.5em;
+    background-color: var(--secondary-color);
+}
+
+.popup_selection_success_body {
+    background-color: var(--success-pastel-color);
+}
+
+.popup_selection_fail_body {
+    background-color: var(--fail-pastel-color);
+}

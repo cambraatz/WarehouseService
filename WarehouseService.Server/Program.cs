@@ -1,6 +1,8 @@
 using WarehouseService.Server.Services;
 using WarehouseService.Server.Services.Interfaces;
 using WarehouseService.Server.Models;
+using WarehouseService.Server.Repositories;
+using WarehouseService.Server.Repositories.Interfaces;
 using WarehouseService.Server.Authorization.Requirements;
 using WarehouseService.Server.Authorization.Handlers;
 
@@ -167,6 +169,9 @@ builder.Services.AddScoped<ICookieService, CookieService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMappingService, MappingService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
+
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 
 builder.Services.AddHttpContextAccessor();
 

@@ -17,6 +17,7 @@ const MenuWindow: React.FC<MenuWindowProps> = ({
             <h4 className="prompt">{prompt}</h4>
         </div>
         <div className="warehouse_div">
+            <button type="button" onClick={() => pressButton("cross_dock")}>Cross Dock Processing</button>
             <button type="button" onClick={() => pressButton("unload")}>Unload Vehicle</button>
             <button type="button" onClick={() => pressButton("load")}>Load Vehicle</button>
         </div>

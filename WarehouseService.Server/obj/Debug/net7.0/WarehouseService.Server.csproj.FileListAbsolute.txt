@@ -71,6 +71,7 @@ C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\n
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\WarehouseService.Server.csproj.CoreCompileInputs.cache
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\WarehouseService.Server.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\WarehouseService.Server.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\WarehouseService.Server.sourcelink.json
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\rjimswa.dswa.cache.json
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\rjsmrazor.dswa.cache.json
 C:\Users\camer\Desktop\Apps\WarehouseService\WarehouseService.Server\obj\Debug\net7.0\rjsmcshtml.dswa.cache.json

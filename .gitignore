@@ -1,0 +1,33 @@
+# Logs
+warehouseservice.client/logs
+warehouseservice.client/*.log
+warehouseservice.client/npm-debug.log*
+warehouseservice.client/yarn-debug.log*
+warehouseservice.client/yarn-error.log*
+warehouseservice.client/pnpm-debug.log*
+warehouseservice.client/lerna-debug.log*
+
+warehouseservice.client/node_modules
+warehouseservice.client/dist
+warehouseservice.client/dist-ssr
+warehouseservice.client/*.local
+
+# Editor directories and files
+.vs/
+warehouseservice.client/.vscode/*
+warehouseservice.client/!.vscode/extensions.json
+warehouseservice.client/.idea
+warehouseservice.client/.DS_Store
+warehouseservice.client/*.suo
+warehouseservice.client/*.ntvs*
+warehouseservice.client/*.njsproj
+warehouseservice.client/*.sln
+warehouseservice.client/*.sw?
+
+warehouseservice.client/.env.production
+warehouseservice.client/.env.development
+
+warehouseservice.client/package-lock.json
+
+warehouseservice.client/localhost+2-key.pem
+warehouseservice.client/localhost+2.pem

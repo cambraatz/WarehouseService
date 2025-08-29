@@ -1,0 +1,136 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import Header from './Header/Header';
+import UnloadMenuWindow from './MenuWindow/UnloadMenuWindow';
+import Footer from './Footer/Footer';
+import LoadingSpinner from './LoadingSpinner/LoadingSpinner';
+import Popup from './Popup/Popup';
+//import BarCodeScan from '../assets/BarcodeScan.png';
+
+import { Logout } from '../utils/api/sessions';
+import { useAppContext } from '../contexts/AppContext';
+//import type { Session } from '../contexts/AppContext'
+import { usePopup } from '../hooks/usePopup';
+//import type { PopupType } from './Popup/types/popup';
+import { SUCCESS_WAIT, FAIL_WAIT } from '../utils/helpers/macros';
+
+import { fetchUnloadPackages } from '../utils/api/deliveries';
+import type { RawShipment } from '../types/shipments';
+
+const UnloadingPage: React.FC = () => {
+    const navigate = useNavigate();
+
+    // context types should be inferenced from AppContext hook...
+    const {
+        loading, setLoading,
+        session, setSession,
+    } = useAppContext();
+
+    const {
+        openPopup, closePopup,
+        popupType, /*setPopupType,*/
+        popupVisible, /*setVisible,*/
+    } = usePopup();
+
+    //const DEFAULT_CODE: string = "XXX-XX-XXXX";
+    const [barcode, setBarcode] = useState<string>('');
+    const [activeShipment, setActiveShipment] = useState<RawShipment | undefined>(undefined);
+    //const [packages, setPackages] = useState<RawShipment[]>();
+
+    async function getPackages(bol: string): Promise<RawShipment[]> {
+        setLoading(true);
+        let packageList: RawShipment[] = [];
+        try {
+            const strippedCode = bol.replace(/-/g, '');
+            packageList = await fetchUnloadPackages(strippedCode);
+        } catch (error: unknown) {
+            if (error instanceof Error && error.message === "Unauthorized") {
+                console.error("Session expired, logging out...");
+                openPopup("unload_selection_fail");
+                setTimeout(async () => {
+                    await Logout(session);
+                }, FAIL_WAIT);
+            } else {
+                console.error("An unexpected error occurred: ", error);
+            }
+        } finally {
+            setLoading(false);
+        }
+        return packageList;
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+        e.preventDefault();
+        const packageList: RawShipment[] = await getPackages(barcode);
+        setSession({
+            ...session,
+            packageList: packageList
+        });
+
+        if (packageList.length > 1) {
+            console.log("package list is longer than one: ", packageList);
+            navigate(`/unload/${barcode}`);
+        } else {
+            console.log("package list is equal to one: ", packageList);
+            setActiveShipment(packageList[0]);
+            openPopup("unload_selection");
+        }
+        //navigate(`/unload/${barcode}`);
+        return;
+    }
+
+    const handlePopupSubmit = (barcode: string) => {
+            console.log(barcode);
+            if (activeShipment !== undefined) {
+                console.log(`update records for ${activeShipment.mfstKey}`);
+                alert(`implement update of records for ${activeShipment.mfstKey}`)
+    
+                openPopup("unload_selection_success");
+                setTimeout(() => {
+                    setBarcode('');
+                    closePopup();
+                }, SUCCESS_WAIT);
+            } else {
+                //openPopup("unload__selection_fail");
+                console.error("update failed with undefined 'activeShipment'");
+            }
+        }
+
+    return (
+        <div id="webpage">
+            {loading ? ( <LoadingSpinner /> ) : (
+                <>
+                <Header 
+                    company={session.company ? session.company.split(' ') : ["Transportation", "Computer", "Support", "LLC."]}
+                    title="Warehouse Service"
+                    subtitle="Unload/Load Guide"
+                    currUser={session.username}
+                    logoutButton={true}
+                    root={false}
+                />
+                <UnloadMenuWindow 
+                    prompt="Scan/Enter Freight Barcode"
+                    barcode={barcode}
+                    setBarcode={setBarcode}
+                    handleSubmit={handleSubmit}
+                />
+                <Footer 
+                    classParam="landing_window_footer"
+                />
+                </>
+            )}
+            <Popup 
+                popupType={popupType}
+                isVisible={popupVisible}
+                shipment={activeShipment}
+                barcode={barcode}
+                setBarcode={setBarcode}
+                closePopup={closePopup}
+                handleSubmit={handlePopupSubmit}
+            />
+        </div>
+    )
+};
+
+export default UnloadingPage;

@@ -1,7 +1,15 @@
 ﻿:root {
     --primary-color: #5A89BB;
+    --secondary-color: #e0eaf3;
     --action-color: #e0eaf3;
+    --success-primary-color: #63a35d;
+    --success-secondary-color: #c0d6be;
+    --success-pastel-color: #e8f7e7;
+    --fail-primary-color: #c86b6b;
+    --fail-secondary-color: #edcccc;
+    --fail-pastel-color: #f4e4e4;
     --text-color: #353535;
+    --border-color: #353535;
     --maxWidgetWidth: 800px;
     --maxTableWidth: 1400px;
 }

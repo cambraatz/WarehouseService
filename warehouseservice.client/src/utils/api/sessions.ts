@@ -142,6 +142,21 @@ async function parseErrorMessage(
     return { status: errorStatus, message: errorMessage };
 }
 
+export interface User {
+    Username: string;
+    //permissions?: string;
+    //powerunit?: string;
+    ActiveCompany: string;
+    Companies: string[];
+    //modules?: string[];
+}
+
+export interface ValidationResponse {
+    user: User;
+    sessionId: string;
+    mapping: string;
+}
+
 export async function validateSession(): Promise<Response> {
     const response = await fetch(API_URL + "v1/sessions/me", {
         method: "GET",

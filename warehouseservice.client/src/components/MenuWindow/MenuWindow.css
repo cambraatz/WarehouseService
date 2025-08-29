@@ -36,6 +36,68 @@
     padding: 8px 0;
 }
 
+.umw_figure {
+    display: flex;
+    flex-direction: column;
+    margin: 4% 20%;
+    border: solid 1px var(--text-color);
+    border-radius: 5px;
+}
+
+.umw_header {
+    color: white;
+    background-color: var(--primary-color);
+    border-bottom: solid 1px var(--border-color);
+}
+
+.umw_body {
+    padding: 2em 0 1.5em;
+    background-color: var(--secondary-color);
+}
+
+#umw_barcode_image {
+    height: 30%;
+    width: 30%;
+}
+
+.umw_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 20%;
+}
+
+.umw_form input {
+    height: 2em;
+    width: 80%;
+    background-color: #fff;
+    border-color: rgb(0, 0, 0);
+    color: #333;
+    border-width: 1px;
+    border-radius: 2px;
+    text-align: center;
+    margin: 1.5em 0 1em 0;
+    letter-spacing: 2px;
+}
+
+.umw_button_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0.5em;
+}
+
+.umw_button_div button {
+    height: 2em;
+    width: 50%;
+}
+
+.umw_button_div button:hover {
+    cursor: pointer;
+    background-color: rgb(230, 230, 230);
+}
+
 @media only screen and (min-width: 630px) {
     #widgetHeader {
         margin: 4% 20% 0;

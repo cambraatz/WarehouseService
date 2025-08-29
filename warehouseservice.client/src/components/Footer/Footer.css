@@ -1,4 +1,6 @@
-.landing_window_footer {
+.landing_window_footer,
+.loading_window_footer,
+.validation_window_footer {
     margin: 0 4%;
     display: flex;
     justify-content: flex-end;

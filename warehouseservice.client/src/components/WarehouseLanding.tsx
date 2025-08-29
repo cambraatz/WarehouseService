@@ -1,19 +1,23 @@
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Header from './Header/Header';
+import MenuWindow from './MenuWindow/MenuWindow';
+import Footer from './Footer/Footer';
 import LoadingSpinner from './LoadingSpinner/LoadingSpinner';
 import Popup from './Popup/Popup';
-import Footer from './Footer/Footer';
 
 import { validateSession, Logout } from '../utils/api/sessions';
-import { useAppContext } from '../hooks/useAppContext';
-import type { Session } from '../contexts/AppContext'
+//import { useAppContext } from '../hooks/useAppContext';
+//import type { Session } from '../contexts/AppContext'
+import { useAppContext, type Session } from '../contexts/AppContext';
 import { usePopup } from '../hooks/usePopup';
-import type { PopupType } from '../types/popup';
-
-import { FAIL_WAIT } from '../utils/helpers/macros';
-import MenuWindow from './MenuWindow/MenuWindow';
+import type { PopupType } from './Popup/types/popup';
+//import { FAIL_WAIT } from '../utils/helpers/macros';
 
 const WarehouseLanding: React.FC = () => {
+    const navigate = useNavigate();
+
     // context types should be inferenced from AppContext hook...
     const {
         loading, setLoading,
@@ -24,6 +28,7 @@ const WarehouseLanding: React.FC = () => {
         openPopup, closePopup,
         popupType, /*setPopupType,*/
         popupVisible, /*setVisible,*/
+        failPopup_logout,
     } = usePopup();
 
     useEffect(() => {
@@ -33,6 +38,7 @@ const WarehouseLanding: React.FC = () => {
             setSession,
             openPopup,
             closePopup,
+            failPopup_logout,
             Logout,
             validateSession
         );
@@ -41,9 +47,9 @@ const WarehouseLanding: React.FC = () => {
     interface User {
         Username: string;
         //permissions?: string;
-        //powerunit?: string;
+        Powerunit?: string;
         ActiveCompany: string;
-        Companies: string[];
+        Companies?: string[];
         //modules?: string[];
     }
 
@@ -60,6 +66,7 @@ const WarehouseLanding: React.FC = () => {
         setSession: (session: Session) => void,
         openPopup: (type: PopupType) => void,
         closePopup: () => void,
+        failPopup_logout: (session: Session, message: string) => void,
         Logout: (session?: Session) => void,
         validateSession: () => Promise<Response>,
     ): Promise<void> {
@@ -72,9 +79,9 @@ const WarehouseLanding: React.FC = () => {
                 console.log(data);
 
                 const username: string = data.user.Username;
-                const sessionId: string = data.sessionId;
                 const companyMap: Record<string, string> = JSON.parse(data.mapping);
                 const companyName: string = companyMap[data.user.ActiveCompany];
+                const sessionId: string = data.sessionId;
 
                 setSession({
                     ...session,
@@ -86,21 +93,11 @@ const WarehouseLanding: React.FC = () => {
                 setLoading(false);
                 return;
             } else {
-                openPopup("fail");
-                setTimeout(() => {
-                    Logout(session);
-                    console.error("LOGOUT!");
-                    closePopup();
-                }, FAIL_WAIT);
+                await failPopup_logout(session, "Sesion validation failed, logging out.");
             }
         } catch (error) {
             console.error("Failed to validate session:", error);
-            openPopup("fail");
-            setTimeout(() => {
-                Logout(session);
-                console.error("LOGOUT!");
-                closePopup();
-            }, FAIL_WAIT);
+            await failPopup_logout(session, "Sesion validation failed, logging out.");
         } finally {
             setLoading(false);
         }
@@ -109,22 +106,21 @@ const WarehouseLanding: React.FC = () => {
     function pressButton(target: string): void {
         if (target === "unload") {
             console.log("UNLOAD!");
-            openPopup("unload");
+            //openPopup("unload");
+            navigate('/unload');
         } else {
-            console.log("LOAD!");
-            openPopup("load");
+            navigate('/load');
         }
     }
 
     function handleSubmit(value: string): void {
         console.log(`submitting: ${value}`);
+        navigate(`/unload/${value}`);
     }
 
     return (
         <div id="webpage">
-            {loading ? (
-                <LoadingSpinner />
-            ) : (
+            {loading ? ( <LoadingSpinner /> ) : (
                 <>
                 <Header 
                     company={session.company ? session.company.split(' ') : ["Transportation", "Computer", "Support", "LLC."]}
