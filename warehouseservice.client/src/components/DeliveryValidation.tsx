@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 
 import Header from "./Header/Header";
-import LoadMenuWindow from "./MenuWindow/LoadMenuWindow";
+import DeliveryValidationMenuWindow from "./MenuWindow/DeliveryValidationMenuWindow";
 import Footer from "./Footer/Footer";
 import Popup from "./Popup/Popup";
 import LoadingSpinner from "./LoadingSpinner/LoadingSpinner";
@@ -11,7 +11,7 @@ import { usePopup } from "../hooks/usePopup";
 import { getDate_Str } from "../utils/helpers/dates";
 import { useNavigate } from "react-router-dom";
 //import { validateSession, Logout } from "../utils/api/sessions";
-import { ValidateAndAssignManifest, releaseManifestAccess, checkManifestAccess, type ApiResult } from "../utils/api/deliveries";
+import { ValidateAndAssignManifest, releaseManifestAccess, checkManifestAccess, type ApiResult, type CheckManifestResult } from "../utils/api/sessions";
 import { FAIL_WAIT } from "../utils/helpers/macros";
 import { Logout } from "../utils/api/sessions";
 import { validate_dv_form } from "../utils/validation/deliveryValidation";
@@ -58,6 +58,7 @@ const DeliveryValidation: React.FC = () => {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        e.preventDefault();
         clearStateStyling();
         const id = e.target.id;
         const val = e.target.value;
@@ -83,6 +84,9 @@ const DeliveryValidation: React.FC = () => {
     const validateDelivery = async () => {
         const { username, id } = session;
         const { mfstdate, powerunit } = formData;
+        console.log(`session: ${session}`);
+        console.log(`formData: ${formData}`);
+        console.log(`username: ${username}, id: ${id}, mfstdate: ${mfstdate}, powerunit: ${powerunit}`);
 
         try {
             const response: ApiResult = await ValidateAndAssignManifest(
@@ -123,9 +127,9 @@ const DeliveryValidation: React.FC = () => {
 
                 openPopup("fail");
                 setTimeout(async () => {
-                    clearStateStyling();
                     await Logout(session);
                     closePopup();
+                    clearStateStyling();
                     return;
                 }, FAIL_WAIT);
             }
@@ -157,7 +161,7 @@ const DeliveryValidation: React.FC = () => {
     };
 
     const [conflictID, setConflictID] = useState<number>(-1);
-    const handleManifestAccessRequest = async () => {
+    const handleManifestAccessRequest = async (): Promise<CheckManifestResult> => {
         // ensure SSO gated access on mfstdate + powerunit...
         const result = await checkManifestAccess(formData.powerunit, formData.mfstdate, session.id);
         if (result.success) {
@@ -165,6 +169,10 @@ const DeliveryValidation: React.FC = () => {
         } else {
             console.error("Manifest access check failed:", result.message);
             if (result.conflict) {
+                if (result.code === 401) {
+                    await Logout(session);
+                    return result;
+                }
                 setConflictID(Number(result.conflictingSessionId));
                 switch (result.conflictType) {
                     case "same_user":
@@ -187,6 +195,7 @@ const DeliveryValidation: React.FC = () => {
                             mfstdate: result.message,
                             powerunit: result.message
                         });
+                        break;
                     }
             } else {
                 // handle other non-conflict related errors (e.g., 400, 500, network errors)...
@@ -203,9 +212,12 @@ const DeliveryValidation: React.FC = () => {
                 clearStateStyling();
             }, FAIL_WAIT);
         }
+
+        return result;
     };
 
-    const releaseSessionAndLogin = async () => {
+    const releaseSessionAndLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         const release: ApiResult = await releaseManifestAccess(
             session.username,
             formData.powerunit,
@@ -218,9 +230,13 @@ const DeliveryValidation: React.FC = () => {
             }, FAIL_WAIT);
         }
 
-        await handleManifestAccessRequest();
-
-        await validateDelivery();
+        const response: CheckManifestResult = await handleManifestAccessRequest();
+        if (response.success) {
+            await validateDelivery();
+        }
+        else {
+            console.error(`error after session release attempt: ${response.message}`);
+        }
     };
 
     const handleUpdate = async (e: React.FormEvent): Promise<void> => {
@@ -231,11 +247,20 @@ const DeliveryValidation: React.FC = () => {
         if (!isValid) {
             console.error("Input validation error:", message);
             setInputErrors(errors);
+            setTimeout(() => {
+                clearStateStyling();
+            }, FAIL_WAIT);
             return;
         }
 
         // check for manifest access...
-        await handleManifestAccessRequest();
+        const response: CheckManifestResult = await handleManifestAccessRequest();
+        if (response.success) {
+            await validateDelivery();
+        }
+        else {
+            console.error(`conflict occurred: ${response.message}`);
+        }
     };
 
     return (
@@ -252,7 +277,8 @@ const DeliveryValidation: React.FC = () => {
                     logoutButton={true}
                     root={false}
                 />
-                <LoadMenuWindow 
+                <DeliveryValidationMenuWindow 
+                    prompt="Confirm Delivery Info"
                     formData={formData}
                     inputErrors={inputErrors}
                     handleChange={handleChange}
@@ -266,7 +292,7 @@ const DeliveryValidation: React.FC = () => {
                     popupType={popupType}
                     isVisible={popupVisible}
                     closePopup={closePopup}
-                    handleSubmit={releaseSessionAndLogin}
+                    handleEventSubmitAsync={releaseSessionAndLogin}
                 />
             )}
         </div>

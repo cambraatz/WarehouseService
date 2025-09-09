@@ -2,7 +2,7 @@
 import React, { useState, createContext, useContext } from 'react';
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
 import type { RawShipment } from '../types/shipments';
-import type { Delivery } from '../components/LoadingManifest';
+import type { Delivery } from '../components/DeliveryManifest';
 //import type { Session, AppContextType } from './AppContext';
 //import { AppContext } from './AppContext';
 
@@ -21,6 +21,7 @@ export interface LoadingSession {
     mfstdate: string;
     powerunit: string;
     activeDelivery?: Delivery;
+    trailerCode?: string;
 }
 
 // 2. define the shape of the context value...

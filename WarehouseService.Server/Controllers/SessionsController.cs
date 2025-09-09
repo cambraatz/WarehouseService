@@ -233,7 +233,7 @@ namespace WarehouseService.Server.Controllers
                         // conflict: same user, but different session...
                         return Ok(new
                         {
-                            message = $"'{username}') already has active session.",
+                            message = $"'{username}' already has active session.",
                             conflict = true,
                             conflictType = "same_user", // Client will look for this
                             conflictingSessionId = session.Id,

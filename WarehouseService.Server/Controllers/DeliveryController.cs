@@ -89,7 +89,7 @@ namespace WarehouseService.Server.Controllers
                 _logger.LogDebug("Session last activity updates for user {Username}", currUsername);
 
                 // attempt to retrieve first matching delivery manifest...
-                DeliveryManifestResponse? manifest = await _deliveryService.GetDeliveryManifestAsync(companyConnString, request.POWERUNIT, request.MFSTDATE);
+                DeliveryManifestResponse? manifest = await _deliveryService.GetFirstDeliveryManifestAsync(companyConnString, request.POWERUNIT, request.MFSTDATE);
                 if (manifest != null)
                 {
                     _logger.LogInformation($"Valid delivery manifest found for powerunit '{request.POWERUNIT}' on date '{request.MFSTDATE}' for company '{company}'.");
@@ -135,6 +135,95 @@ namespace WarehouseService.Server.Controllers
             {
                 _logger.LogError(ex, "Error fetching packages for BOL: {BolNumber}", bolNumber);
                 return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        private string GetMessage(int undelivered, int delivered)
+        {
+            if (undelivered > 0 && delivered > 0)
+            {
+                return "Both tables returned non-null values";
+            }
+            if (undelivered == 0 && delivered > 0)
+            {
+                return "Delivered returned non-null values, no valid undelivered records.";
+            }
+            if (delivered == 0 && undelivered > 0)
+            {
+                return "Undelivered returned non-null values, no valid delivered records.";
+            }
+
+            return "No valid records were found.";
+        }
+
+        // ["v1/deliveries/{powerunit}{mfstdate}"] fetches deliveries by bill of lading number...
+        [HttpGet] 
+        [Authorize(Policy = "SessionActive")]
+        public async Task<IActionResult> GetDeliveries([FromQuery] string powerunit, [FromQuery] string mfstdate)
+        {
+            // ensure non-null parameters...
+            if (string.IsNullOrEmpty(powerunit) || string.IsNullOrEmpty(mfstdate))
+            {
+                _logger.LogWarning("Powerunit and Manifest Date are required to fetch deliveries.");
+                return BadRequest(new { message = "Powerunit and Manifest Date are required." });
+            }
+
+            // retrieve active company from cookies...
+            var company = Request.Cookies["company"];
+            if (string.IsNullOrEmpty(company))
+            {
+                _logger.LogWarning("Company key cookies is missing while attempting to fetch delivery manifests, for powerunit '{Powerunit}' and date '{ManifestDate}'.", powerunit, mfstdate);
+                return BadRequest(new { message = "Company context is missing from your session. Please ensure you are logged in correctly." });
+            }
+
+            string companyConnString = _config.GetConnectionString(company)!;
+            if (string.IsNullOrEmpty(companyConnString))
+            {
+                throw new Exception($"Server configuration error: Connection string for company '{company}' not found, contact system administrator.");
+            }
+
+            // ensure non-null parameters...
+            var username = Request.Cookies["username"];
+            if (string.IsNullOrEmpty(username))
+            {
+                _logger.LogWarning("USername is required to fetch deliveries.");
+                return BadRequest(new { message = "Username are required." });
+            }
+
+            var accessToken = Request.Cookies["access_token"];
+            //var refreshToken = Request.Cookies["refresh_token"];
+
+            // update driver session...
+            await _sessionService.UpdateSessionLastActivityAsync(username, accessToken!);
+            _logger.LogDebug("Session last activity updated for user {Username}.", username);
+
+            try
+            {
+                DeliveryListResponse? manifests = await _deliveryService.GetDeliveryManifestsAsync(companyConnString, powerunit, mfstdate);
+
+                if (manifests == null)
+                {
+                    throw new Exception("Fetching manifests returned null results.");
+                }
+
+                string responseMessage = GetMessage(manifests.undelivered.Count, manifests.delivered.Count);
+                manifests.message = responseMessage;
+
+                _logger.LogInformation("Successfully retrieved {UndeliveredCount} undelivered and {DeliveredCount} delivered manifests for Powerunit: '{Powerunit}', Date: '{ManifestDate}'.", manifests.undelivered.Count, manifests.delivered.Count, powerunit, mfstdate);
+                return Ok(manifests);
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = string.IsNullOrEmpty(ex.Message)
+                    ? "An internal server error occurred while retrieving deliveries. Please try again later."
+                    : ex.Message;
+
+                _logger.LogError(ex, "An unexpected error occurred while fetching deliveries for powerunit '{Powerunit}', date '{ManifestDate}'. Error: {ErrorMessage}", powerunit, mfstdate, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    message = "An internal server error occurred while retrieving deliveries. Please try again later.",
+                    details = errorMessage
+                });
             }
         }
     }

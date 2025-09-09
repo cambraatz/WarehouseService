@@ -26,7 +26,8 @@ cursor.execute('''
     PRODUCTDESC VARCHAR(300) NOT NULL,
     PRODUCTWEIGHT SMALLINT NOT NULL,
     WIDTH SMALLINT NOT NULL,
-	HEIGHT SMALLINT NOT NULL
+	HEIGHT SMALLINT NOT NULL,
+    TRAILERNUM VARCHAR(20) NULL
 );''')
 
 bol_data = [
@@ -47,6 +48,7 @@ bol_data = [
         "PRODUCTWEIGHT": 4500,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925002",
@@ -65,6 +67,7 @@ bol_data = [
         "PRODUCTWEIGHT": 1200,
         "WIDTH": 144,
         "HEIGHT": 18,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925003",
@@ -83,6 +86,7 @@ bol_data = [
         "PRODUCTWEIGHT": 3800,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925004",
@@ -101,6 +105,7 @@ bol_data = [
         "PRODUCTWEIGHT": 2500,
         "WIDTH": 180,
         "HEIGHT": 24,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925005",
@@ -119,6 +124,7 @@ bol_data = [
         "PRODUCTWEIGHT": 4500,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925006",
@@ -137,6 +143,7 @@ bol_data = [
         "PRODUCTWEIGHT": 1200,
         "WIDTH": 144,
         "HEIGHT": 18,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925007",
@@ -155,6 +162,7 @@ bol_data = [
         "PRODUCTWEIGHT": 3800,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925008",
@@ -173,6 +181,7 @@ bol_data = [
         "PRODUCTWEIGHT": 2500,
         "WIDTH": 180,
         "HEIGHT": 24,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925009",
@@ -191,6 +200,7 @@ bol_data = [
         "PRODUCTWEIGHT": 4500,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925010",
@@ -209,6 +219,7 @@ bol_data = [
         "PRODUCTWEIGHT": 1200,
         "WIDTH": 144,
         "HEIGHT": 18,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925011",
@@ -227,6 +238,7 @@ bol_data = [
         "PRODUCTWEIGHT": 4500,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925012",
@@ -245,6 +257,7 @@ bol_data = [
         "PRODUCTWEIGHT": 1200,
         "WIDTH": 144,
         "HEIGHT": 18,
+        "TRAILERNUM": None,
     },
     {
         "MFSTKEY": "047X081925013",
@@ -263,6 +276,7 @@ bol_data = [
         "PRODUCTWEIGHT": 3800,
         "WIDTH": 48,
         "HEIGHT": 48,
+        "TRAILERNUM": None,
     },
 ]
 
@@ -272,10 +286,10 @@ for record in bol_data:
     query = """
         INSERT INTO TCSWEB.dbo.TEMPDELIVERY (
         MFSTKEY, BOLNUM, ROUTECODE, PRONUM, DOORNUM, BINNUM, ROLLNUM, TERMINAL, SHIPNAME, 
-        CONSNAME, CONSADD1, CONSADD2, PRODUCTDESC, PRODUCTWEIGHT, WIDTH, HEIGHT
+        CONSNAME, CONSADD1, CONSADD2, PRODUCTDESC, PRODUCTWEIGHT, WIDTH, HEIGHT, TRAILERNUM
         )
         VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         );"""
     
     params = (
@@ -295,6 +309,7 @@ for record in bol_data:
         record["PRODUCTWEIGHT"],
         record["WIDTH"],
         record["HEIGHT"],
+        record["TRAILERNUM"],
     )
 
     cursor.execute(query, params)

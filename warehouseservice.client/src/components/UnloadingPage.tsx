@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Header from './Header/Header';
-import UnloadMenuWindow from './MenuWindow/UnloadMenuWindow';
+import UnloadMenuWindow from './MenuWindow/BarcodeMenuWindow';
 import Footer from './Footer/Footer';
 import LoadingSpinner from './LoadingSpinner/LoadingSpinner';
 import Popup from './Popup/Popup';
@@ -43,7 +43,7 @@ const UnloadingPage: React.FC = () => {
         let packageList: RawShipment[] = [];
         try {
             const strippedCode = bol.replace(/-/g, '');
-            packageList = await fetchUnloadPackages(strippedCode);
+            packageList = await fetchUnloadPackages(strippedCode, session);
         } catch (error: unknown) {
             if (error instanceof Error && error.message === "Unauthorized") {
                 console.error("Session expired, logging out...");
@@ -71,10 +71,14 @@ const UnloadingPage: React.FC = () => {
         if (packageList.length > 1) {
             console.log("package list is longer than one: ", packageList);
             navigate(`/unload/${barcode}`);
-        } else {
+        } else if (packageList.length == 1) {
             console.log("package list is equal to one: ", packageList);
             setActiveShipment(packageList[0]);
             openPopup("unload_selection");
+        } else {
+            console.error("package list was not found or is empty.");
+            // *** ADD ERROR STYLING TO BARCODE ENTRY WINDOW HERE *** ///
+            return;
         }
         //navigate(`/unload/${barcode}`);
         return;
@@ -127,7 +131,7 @@ const UnloadingPage: React.FC = () => {
                 barcode={barcode}
                 setBarcode={setBarcode}
                 closePopup={closePopup}
-                handleSubmit={handlePopupSubmit}
+                handleBarcodeSubmit={handlePopupSubmit}
             />
         </div>
     )

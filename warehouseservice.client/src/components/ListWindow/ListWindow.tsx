@@ -1,4 +1,4 @@
-import type { DeliveryManifestState } from "../LoadingManifest";
+import type { DeliveryManifestState } from "../DeliveryManifest";
 import "./ListWindow.css";
 
 interface ListWindowProps {
@@ -14,12 +14,12 @@ const ListWindow: React.FC<ListWindowProps> = ({ renderSubheader, mfstDate, powe
     return (
         <>
         {renderSubheader && (
-            <div className="list_window_subheader">
-                <div className="list_window_subheader_item">
+            <div className="lw_subheader">
+                <div className="lw_subheader_item">
                     <h4>Manifest Date:</h4>
                     <h4 className="weak">{mfstDate}</h4>
                 </div>
-                <div className="list_window_subheader_item">
+                <div className="lw_subheader_item">
                     <h4>Power Unit:</h4>
                     <h4 className="weak">{powerUnit}</h4>
                 </div>
@@ -51,7 +51,7 @@ const ListWindowContent: React.FC<ListWindowContentProps> = ({ status, deliverie
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return Object.entries(deliveries).flatMap(([_, deliveryList]) => {
                 return deliveryList.map((delivery) => (
-                    <tr key={`${delivery.mfstKey}`} className={`lw_table_body ${status.toLowerCase()}`} id={delivery.mfstKey}>
+                    <tr key={`${delivery.mfstKey}`} className={`lw_table_body ${status.toLowerCase()}`} id={delivery.mfstKey} onClick={handleClick}>
                         <td className="col1">{delivery.stop}</td>
                         <td className="col2">{delivery.proNumber}</td>
                         <td className="col3">{delivery.consName}</td>
@@ -68,7 +68,7 @@ const ListWindowContent: React.FC<ListWindowContentProps> = ({ status, deliverie
         }
     }
 
-    const handleClick = (e: React.MouseEvent<HTMLTableElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
         const row = e.currentTarget;
         console.log('Row clicked:', row);
         const proNum: string = row.querySelector('.col2')!.textContent;
@@ -78,7 +78,7 @@ const ListWindowContent: React.FC<ListWindowContentProps> = ({ status, deliverie
     return (
         <>
         <figure className="lw_table_figure">
-            <table className={`lw_table ${(status === "Delivered") ? "trailing_table" : ""}`} onClick={handleClick}>
+            <table className={`lw_table ${(status === "Delivered") ? "trailing_table" : ""}`}>
                 <thead>
                     <tr className="lw_title_row">
                         <th className="lw_title" colSpan={7}>{status}</th>

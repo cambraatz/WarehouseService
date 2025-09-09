@@ -5,17 +5,7 @@ export function validate_dv_form(formData: ValidationForm) {
     let dateError: string | undefined = undefined;
     let powerunitError: string | undefined = undefined;
 
-    const date_in_form = new Date(formData.deliveryDate);
-
-    if (isNaN(date_in_form.getTime())) {
-        dateError = "Valid powerunit is required!";
-        isValid = false;
-    };
-
-    if (formData.powerunit.trim() == "") {
-        powerunitError = "Valid powerunit is required!";
-        isValid = false;
-    };
+    const date_in_form = new Date(formData.mfstdate);
 
     type ErrorMessages = {
         mfstdate: string;
@@ -24,6 +14,16 @@ export function validate_dv_form(formData: ValidationForm) {
     const errors: ErrorMessages = {
         mfstdate: "",
         powerunit: ""
+    };
+
+    if (isNaN(date_in_form.getTime())) {
+        dateError = "Valid date is required!";
+        isValid = false;
+    };
+
+    if (formData.powerunit.trim() == "") {
+        powerunitError = "Valid powerunit is required!";
+        isValid = false;
     };
 
     if (dateError && powerunitError) {

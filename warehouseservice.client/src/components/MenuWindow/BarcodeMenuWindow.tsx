@@ -45,8 +45,6 @@ const UnloadMenuWindow: React.FC<UnloadMenuWindowProps> = ({
         setBarcode(formattedValue);
     };
 
-    
-
     return (
         <figure className="umw_figure">
             <div className="umw_header">

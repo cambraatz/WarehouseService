@@ -6,30 +6,41 @@ import Success_Image from '../../assets/success.svg';
 import Fail_Image from '../../assets/error.svg';
 import './Popup.css';
 import type { RawShipment } from '../../types/shipments';
+import type { Delivery } from '../DeliveryManifest';
 
 interface PopupProps {
     popupType: PopupType;
     isVisible: boolean;
     shipment?: RawShipment;
+    delivery?: Delivery;
     barcode?: string;
     setBarcode?: Dispatch<SetStateAction<string>>;
+    trailerNum?: string;
+    setTrailerNum?: Dispatch<SetStateAction<string>>;
     closePopup: () => void;
-    handleSubmit: (barcode: string) => void;
+    handleBarcodeSubmit?: (barcode: string) => void;
+    handleTrailerNumSubmit?: (trailerNum: string) => void;
+    handleEventSubmitAsync?: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
 }
 
 const Popup: React.FC<PopupProps> = ({ 
     popupType,
     isVisible,
     shipment,
+    delivery,
     barcode,
     setBarcode,
+    trailerNum,
+    setTrailerNum,
     closePopup,
-    handleSubmit
+    handleBarcodeSubmit,
+    handleTrailerNumSubmit,
+    handleEventSubmitAsync,
 }) => {
     // establish ref to input on popup...
     const inputRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
-        const typesToFocus = ['unload', 'unload_selection'];
+        const typesToFocus = ['unload', 'unload_selection', "load_trailer_selection"];
         if (isVisible && 
             typesToFocus.includes(popupType) && 
             inputRef.current) {
@@ -46,11 +57,11 @@ const Popup: React.FC<PopupProps> = ({
     const DEFAULT_CODE: string = "XXX-XX-XXXX";
     //const [barcode, setBarcode] = useState<string>('');
 
-    const handleUnloadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleBarcodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (setBarcode) {
-            const rawValue = e.target.value;
-            // reject non-numeric values...
-            const numericValue = rawValue.replace(/[^A-Za-z0-9]/g, '');
+            const rawValue = e.target.value.toUpperCase();
+            // reject non-alphanumeric values...
+            const numericValue = rawValue.replace(/[^A-Z0-9]/g, '');
 
             // ensure XXX-XX-XXXX format...
             let formattedValue = '';
@@ -67,12 +78,41 @@ const Popup: React.FC<PopupProps> = ({
         }
     };
 
+    const DEFAULT_TRAILER: string = "XXXXXXXXXXXXXXXXX";
+    const handleTrailerNumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (setTrailerNum) {
+            const rawVal = e.target.value.toUpperCase();
+            const formattedVal = rawVal.replace(/[^A-Z0-9]/g, '');
+            setTrailerNum(formattedVal);
+        }
+    };
+
+    const handleTrailerSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!setTrailerNum || !trailerNum || !handleTrailerNumSubmit) {
+            console.error("Missing trailer data/functions to submit.");
+            return;
+        }
+
+        if (trailerNum.replace(/[^A-Z0-9]/g, '').length === 17) {
+            handleTrailerNumSubmit(trailerNum);
+            setTrailerNum('');
+            closePopup();
+        } else {
+            console.error('Invalid trailer number format. Please check the value.');
+        }
+    }
+
     const handleUnloadSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!setBarcode || !barcode || !handleBarcodeSubmit) {
+            console.error("Missing barcode data/functions to submit.");
+            return;
+        }
 
         // ensure unload popup is open and valid barcode...
-        if (setBarcode && barcode.replace(/[^A-Za-z0-9]/g, '').length === 9) {
-            handleSubmit(barcode);
+        if (barcode.replace(/[^A-Z0-9]/g, '').length === 9) {
+            handleBarcodeSubmit(barcode);
             setBarcode('');
             closePopup();
         } else {
@@ -82,9 +122,18 @@ const Popup: React.FC<PopupProps> = ({
 
     const handleUnloadSelectionSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!barcode) {
+            console.error("Missing barcode data to submit.");
+            return;
+        }
+        if (!handleBarcodeSubmit) {
+            console.error("Missing barcode functions to submit.");
+            return;
+        }
+
         // ensure unload popup is open and valid barcode...
         if (popupType === "unload_selection") {
-            handleSubmit(barcode);
+            handleBarcodeSubmit(barcode);
         } else {
             console.log('Invalid barcode format. Please check the value.');
         }
@@ -94,17 +143,17 @@ const Popup: React.FC<PopupProps> = ({
         if (popupType === "unload" && setBarcode) {
             return (
                 <div className="popupPrompt">
-                    <img id="barcode_scan_image" src={BarCodeScan} alt="barcode scanner image" />
+                    <img id="code_scan_image" src={BarCodeScan} alt="code scanner image" />
                     <p>Scan/Enter Freight Barcode</p>
-                    <div className="barcode_input_div">
+                    <div className="code_input_div">
                         <form onSubmit={handleUnloadSubmit}>
                             <input
                                 type="text"
-                                id="barcode_input"
+                                id="code_input"
                                 placeholder={DEFAULT_CODE}
                                 value={barcode}
                                 ref={inputRef}
-                                onChange={handleUnloadChange}
+                                onChange={handleBarcodeChange}
                             />
                             <div className="unload_button_div">
                                 <button type="submit">Submit</button>
@@ -133,17 +182,17 @@ const Popup: React.FC<PopupProps> = ({
                         </div>
                     </div>
                     <div className="popup_unload_selection_body">
-                        <img id="barcode_scan_image" src={BarCodeScan} alt="barcode scanner image" />
+                        <img id="code_scan_image" src={BarCodeScan} alt="code scanner image" />
                         <p>Scan/Enter Bin Location Code</p>
-                        <div className="barcode_input_div">
+                        <div className="code_input_div">
                             <form onSubmit={handleUnloadSelectionSubmit}>
                                 <input
                                     type="text"
-                                    id="barcode_input"
+                                    id="code_input"
                                     placeholder={DEFAULT_CODE}
                                     value={barcode}
                                     ref={inputRef}
-                                    onChange={handleUnloadChange}
+                                    onChange={handleBarcodeChange}
                                 />
                                 <div className="unload_button_div">
                                     <button type="submit">Submit</button>
@@ -175,11 +224,11 @@ const Popup: React.FC<PopupProps> = ({
                     <div className={`popup_selection_${promptStatus}_body`}>
                         <img id={`${promptStatus}_image`} src={popupType.includes("success") ? Success_Image : Fail_Image} alt={`${promptStatus} image`} />
                         <p>{popupType.includes("success") ? "Successfully logged package!" : "Failed to log package!"}</p>
-                        <div className="barcode_input_div">
+                        <div className="code_input_div">
                             <form>
                                 <input
                                     type="text"
-                                    id="barcode_input"
+                                    id="code_input"
                                     value={barcode}
                                     disabled
                                 />
@@ -193,6 +242,61 @@ const Popup: React.FC<PopupProps> = ({
                 <div className="load_popup">
                     <h3>Hello World!</h3>
                 </div>
+            )
+        } else if (popupType === "load_trailer_selection") {
+            if (delivery === undefined || !setTrailerNum) {
+                console.error("delivery is undefined, something went wrong.");
+                closePopup();
+                return;
+            }
+            return (
+                <figure className="popup_load_selection">
+                    <div className="popup_load_selection_header">
+                        <h5>{delivery.proNumber}</h5>
+                        <div className="popup_load_selection_double_col">
+                            <h4 className="weak">{delivery.consAdd1}</h4>
+                            {delivery.consAdd2 && (
+                                <h4 className="weak">{delivery.consAdd2}</h4>
+                            )}
+                        </div>
+                    </div>
+                    <div className="popup_load_selection_body">
+                        <img id="code_scan_image" src={BarCodeScan} alt="code scanner image" />
+                        <p>Scan/Enter Trailer Code</p>
+                        <div className="code_input_div">
+                            <form onSubmit={handleTrailerSubmit}>
+                                <input
+                                    type="text"
+                                    id="code_input"
+                                    placeholder={DEFAULT_TRAILER}
+                                    value={trailerNum}
+                                    ref={inputRef}
+                                    onChange={handleTrailerNumChange}
+                                />
+                                <div className="load_button_div">
+                                    <button type="submit">Submit</button>
+                                    <button type="button" onClick={() => setTrailerNum(DEFAULT_CODE)}>Reset</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </figure>  
+            )
+        } else if (popupType === "load_ex_dv_conflict") {
+            return (
+                <figure className="popup_load_conflict">
+                    <div id="popup_load_prompt" className="content">
+                        <img id="fail" src={Fail_Image} alt="fail"/>
+                        <p>Existing session already exists, proceed to logout of the previous session.</p>
+                    </div>
+                    <form className="popup_form" onSubmit={handleEventSubmitAsync}>
+                        <button 
+                            className="popup_button"
+                            type="submit"
+                        >Login</button>
+                        <button className="popup_button" onClick={closePopup}>Cancel</button>
+                    </form>
+                </figure>
             )
         } else if (popupType === "fail") {
             return (
@@ -228,13 +332,19 @@ const Popup: React.FC<PopupProps> = ({
     else if (popupType.includes("unload_selection")) {
         popupClass = "popupUnloadSelection";
     } 
+    else if (popupType.includes("load_trailer")) {
+        popupClass = "popupLoadSelection";
+    }
     else if (popupType.includes("unload")) {
         popupClass = "popupUnload";
-    } 
+    }
+    else if (popupType.includes("load")) {
+        popupClass = "popupLoad";
+    }
 
     return (
         <div id="popup_overlay" className={`overlay ${overlayClass}`}>
-            <div className={popupClass}>
+            <div className={`popup ${popupClass}`}>
                 <div id="popupExit" className="content">
                     <h1 id="close" className="popupWarehouseWindow" onClick={closePopup}>&times;</h1>
                 </div>

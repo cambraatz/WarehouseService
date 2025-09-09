@@ -53,7 +53,7 @@ namespace WarehouseService.Server.Services
             return mappedPackages;
         }
 
-        public async Task<DeliveryManifestResponse?> GetDeliveryManifestAsync(string companyConn, string powerunit, string manifestDate)
+        public async Task<DeliveryManifestResponse?> GetFirstDeliveryManifestAsync(string companyConn, string powerunit, string manifestDate)
         {
             // reject improper parameter data...
             if (string.IsNullOrEmpty(powerunit) || string.IsNullOrEmpty(manifestDate))
@@ -62,7 +62,7 @@ namespace WarehouseService.Server.Services
             }
 
             // fetch manifest from db repo...
-            var dbManifest = await _deliveryRepo.GetDeliveryManifestAsync(powerunit, manifestDate);
+            var dbManifest = await _deliveryRepo.GetFirstDeliveryManifestAsync(companyConn, powerunit, manifestDate);
             if (dbManifest == null)
             {
                 return null;
@@ -99,6 +99,104 @@ namespace WarehouseService.Server.Services
             };
 
             return manifest;
+        }
+
+        public async Task<DeliveryListResponse?> GetDeliveryManifestsAsync(
+            string companyConn,
+            string powerunit,
+            string manifestDate)
+        {
+            if (string.IsNullOrEmpty(companyConn) || string.IsNullOrEmpty(powerunit) || string.IsNullOrEmpty(manifestDate))
+            {
+                return null;
+            }
+
+            List<DB_Manifest>? dbUndelivered = await _deliveryRepo.GetDeliveryManifestAsync(companyConn, powerunit, manifestDate, "0");
+            List<DB_Manifest>? dbDelivered = await _deliveryRepo.GetDeliveryManifestAsync(companyConn, powerunit, manifestDate, "1");
+            if (dbUndelivered == null || dbDelivered == null)
+            {
+                return null;
+            }
+
+            var undelivered = new List<DeliveryManifestResponse>();
+            var delivered = new List<DeliveryManifestResponse>();
+            var manifest = new DeliveryManifestResponse();
+
+            foreach (DB_Manifest dbManifest in dbUndelivered)
+            {
+                manifest = new DeliveryManifestResponse
+                {
+                    mfstKey = dbManifest.MFSTKEY,
+                    status = dbManifest.STATUS,
+                    lastUpdate = dbManifest.LASTUPDATE,
+                    mfstNumber = dbManifest.MFSTNUMBER,
+                    powerUnit = dbManifest.POWERUNIT,
+                    stop = dbManifest.STOP,
+                    mfstDate = dbManifest.MFSTDATE,
+                    proNumber = dbManifest.PRONUMBER,
+                    proDate = dbManifest.PRODATE,
+                    shipName = dbManifest.SHIPNAME,
+                    consName = dbManifest.CONSNAME,
+                    consAdd1 = dbManifest.CONSADD1,
+                    consAdd2 = dbManifest.CONSADD2,
+                    consCity = dbManifest.CONSCITY,
+                    consState = dbManifest.CONSSTATE,
+                    consZip = dbManifest.CONSZIP,
+                    ttlPcs = dbManifest.TTLPCS,
+                    ttlYds = dbManifest.TTLYDS,
+                    ttlWgt = dbManifest.TTLWGT,
+                    dlvdDate = dbManifest.DLVDDATE,
+                    dlvdTime = dbManifest.DLVDTIME,
+                    dlvdPcs = dbManifest.DLVDPCS,
+                    dlvdSign = dbManifest.DLVDSIGN,
+                    dlvdNote = dbManifest.DLVDNOTE,
+                    dlvdImgFileLocn = dbManifest.DLVDIMGFILELOCN,
+                    dlvdImgFileSign = dbManifest.DLVDIMGFILESIGN
+                };
+                undelivered.Add(manifest);
+            }
+
+            foreach (DB_Manifest dbManifest in dbDelivered)
+            {
+                manifest = new DeliveryManifestResponse
+                {
+                    mfstKey = dbManifest.MFSTKEY,
+                    status = dbManifest.STATUS,
+                    lastUpdate = dbManifest.LASTUPDATE,
+                    mfstNumber = dbManifest.MFSTNUMBER,
+                    powerUnit = dbManifest.POWERUNIT,
+                    stop = dbManifest.STOP,
+                    mfstDate = dbManifest.MFSTDATE,
+                    proNumber = dbManifest.PRONUMBER,
+                    proDate = dbManifest.PRODATE,
+                    shipName = dbManifest.SHIPNAME,
+                    consName = dbManifest.CONSNAME,
+                    consAdd1 = dbManifest.CONSADD1,
+                    consAdd2 = dbManifest.CONSADD2,
+                    consCity = dbManifest.CONSCITY,
+                    consState = dbManifest.CONSSTATE,
+                    consZip = dbManifest.CONSZIP,
+                    ttlPcs = dbManifest.TTLPCS,
+                    ttlYds = dbManifest.TTLYDS,
+                    ttlWgt = dbManifest.TTLWGT,
+                    dlvdDate = dbManifest.DLVDDATE,
+                    dlvdTime = dbManifest.DLVDTIME,
+                    dlvdPcs = dbManifest.DLVDPCS,
+                    dlvdSign = dbManifest.DLVDSIGN,
+                    dlvdNote = dbManifest.DLVDNOTE,
+                    dlvdImgFileLocn = dbManifest.DLVDIMGFILELOCN,
+                    dlvdImgFileSign = dbManifest.DLVDIMGFILESIGN
+                };
+                delivered.Add(manifest);
+            }
+
+            var manifests = new DeliveryListResponse
+            {
+                undelivered = undelivered,
+                delivered = delivered
+            };
+
+            return manifests;
         }
     }
 }

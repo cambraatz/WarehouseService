@@ -1,197 +1,138 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Header from './Header/Header';
-//import MenuWindow from './MenuWindow/MenuWindow';
-import ListWindow from './ListWindow/ListWindow';
+import BarcodeMenuWindow from './MenuWindow/BarcodeMenuWindow';
 import Footer from './Footer/Footer';
 import LoadingSpinner from './LoadingSpinner/LoadingSpinner';
-//import Popup from './Popup/Popup';
+import Popup from './Popup/Popup';
+//import BarCodeScan from '../assets/BarcodeScan.png';
 
+import { Logout } from '../utils/api/sessions';
 import { useAppContext } from '../contexts/AppContext';
-//import type { Session } from '../contexts/AppContext';
-//import { Logout } from '../utils/api/sessions';
-//import { FAIL_WAIT } from '../utils/helpers/macros';
-import {fetchDeliveryManifests, type DeliveryManifest }  from '../utils/api/deliveries';
-//import type { Session } from 'react-router-dom';
+//import type { Session } from '../contexts/AppContext'
 import { usePopup } from '../hooks/usePopup';
-//import type { PopupType } from '../types/popup';
+//import type { PopupType } from './Popup/types/popup';
+import { SUCCESS_WAIT, FAIL_WAIT } from '../utils/helpers/macros';
 
-export interface Delivery {
-    mfstKey: string;
-    status: string;
-    lastUpdate: string;
-    mfstNumber: string;
-    powerUnit: string;
-    stop: number; // Corresponds to C# short
-    mfstDate: string;
-    proNumber: string;
-    proDate: string;
-    shipName: string;
-    consName: string;
-    consAdd1: string;
-    consAdd2: string | null;
-    consCity: string;
-    consState: string;
-    consZip: string;
-    ttlPcs: number;
-    ttlYds: number;
-    ttlWgt: number;
-    dlvdDate: string | null;
-    dlvdTime: string | null;
-    dlvdPcs: number | null;
-    dlvdSign: string | null;
-    dlvdNote: string | null;
-    dlvdImgFileLocn: string | null;
-    dlvdImgFileSign: string | null;
-}
-
-export interface DeliveryManifestState {
-    [key: string]: Delivery[];
-}
+import { fetchUnloadPackages } from '../utils/api/deliveries';
+import type { RawShipment } from '../types/shipments';
 
 const LoadingManifest: React.FC = () => {
+    const navigate = useNavigate();
+
+    // context types should be inferenced from AppContext hook...
     const {
         loading, setLoading,
-        session, /*setSession,*/
-        loadingSession, setLoadingSession
+        session, setSession,
     } = useAppContext();
 
     const {
-        /*openPopup, closePopup,
-        popupType, setPopupType,
-        popupVisible, setVisible,*/
-        failPopup_logout
+        openPopup, closePopup,
+        popupType, /*setPopupType,*/
+        popupVisible, /*setVisible,*/
     } = usePopup();
 
-    const navigate = useNavigate();
+    //const DEFAULT_CODE: string = "XXX-XX-XXXX";
+    const [barcode, setBarcode] = useState<string>('');
+    const [activeShipment, setActiveShipment] = useState<RawShipment | undefined>(undefined);
+    //const [packages, setPackages] = useState<RawShipment[]>();
 
-    const [undelivered, setUndelivered] = useState<DeliveryManifestState>();
-    const [delivered, setDelivered] = useState<DeliveryManifestState>();
-
-    // split delivery manifest into render format...
-    const packageDeliveries = (deliveries: Delivery[], allowDuplicates: boolean): DeliveryManifestState => {
-        const sharedAddress = (a: Delivery, b: Delivery): boolean => {
-            if (a.consAdd1 === b.consAdd1 && a.consAdd2 === b.consAdd2) { return true; }
-            return false;
-        };
-
-        let i: number = 0;
-        let currDelivery: Delivery | undefined = undefined; // 'sticks' to first delivery at each unique address...
-        const packagedDeliveries: DeliveryManifestState = {};
-
-        while (i < deliveries.length) {
-            // when allowed, group deliveries whose addresses are shared...
-            if (currDelivery && sharedAddress(deliveries[i], currDelivery) && allowDuplicates) {
-                const sharedDeliveries: Delivery[] = [currDelivery]; // initialize new array of shared deliveries...
-                while (i < deliveries.length && sharedAddress(deliveries[i], currDelivery)) {
-                    sharedDeliveries.push(deliveries[i]);
-                    i += 1;
-                }
-                packagedDeliveries[currDelivery.stop] = sharedDeliveries;
-            } 
-            // catch delivered | unique addresses | unallowed duplicates...
-            else {
-                currDelivery = deliveries[i];
-                packagedDeliveries[deliveries[i].stop] = [ deliveries[i] ];
-                i += 1;
+    async function getPackages(bol: string): Promise<RawShipment[]> {
+        setLoading(true);
+        let packageList: RawShipment[] = [];
+        try {
+            const strippedCode = bol.replace(/-/g, '');
+            packageList = await fetchUnloadPackages(strippedCode);
+        } catch (error: unknown) {
+            if (error instanceof Error && error.message === "Unauthorized") {
+                console.error("Session expired, logging out...");
+                openPopup("unload_selection_fail");
+                setTimeout(async () => {
+                    await Logout(session);
+                }, FAIL_WAIT);
+            } else {
+                console.error("An unexpected error occurred: ", error);
             }
+        } finally {
+            setLoading(false);
         }
-        return packagedDeliveries;
+        return packageList;
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+        e.preventDefault();
+        const packageList: RawShipment[] = await getPackages(barcode);
+        setSession({
+            ...session,
+            packageList: packageList
+        });
+
+        if (packageList.length > 1) {
+            console.log("package list is longer than one: ", packageList);
+            navigate(`/unload/${barcode}`);
+        } else if (packageList.length == 1) {
+            console.log("package list is equal to one: ", packageList);
+            setActiveShipment(packageList[0]);
+            openPopup("unload_selection");
+        } else {
+            console.error("package list was not found or is empty.");
+            // *** ADD ERROR STYLING TO BARCODE ENTRY WINDOW HERE *** ///
+            return;
+        }
+        //navigate(`/unload/${barcode}`);
+        return;
     }
 
-    const failPopup_memo = useCallback(async (message: string) => {
-        failPopup_logout(session, message);
-    }, [session, failPopup_logout]);
-
-    // query all deliveries matching the provided delivery details...
-    const getDeliveries = useCallback(async (powerunit: string, mfstdate: string) => {
-        // attempt to gather deliveries...
-        try {
-            const manifest: DeliveryManifest = await fetchDeliveryManifests(powerunit, mfstdate);
-            // parse deliveries into render-ready form...
-            const undelivered: DeliveryManifestState = packageDeliveries(manifest.undelivered, false);
-            const delivered: DeliveryManifestState = packageDeliveries(manifest.delivered, false);
-            
-            // set state values...
-            setUndelivered(undelivered);
-            setDelivered(delivered);
-            return;
-        } catch (error) {
-            console.error(error);
-        }
-
-        failPopup_memo("fetching deliveries getDeliveries failed, logging out.");
-    }, [failPopup_memo]);
-
-    useEffect(() => {
-        const isSessionInvalid = () => {
-            return (
-                !session.username ||
-                !session.company ||
-                !loadingSession.mfstdate ||
-                !loadingSession.powerunit
-            );
-        };
-        setLoading(true);
-        if (isSessionInvalid()) {
-            failPopup_memo("Loading manifest session validation failed.");
-        };
-
-        getDeliveries(session.powerunit!, session.mfstdate!);
-        setLoading(false);
-    }, [session, loadingSession, getDeliveries, failPopup_memo, setLoading]);
-
-    const selectDelivery = (deliveries: DeliveryManifestState, proNumber: string) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, list] of Object.entries(deliveries)) {
-            for (const delivery of list) {
-                if (delivery.proNumber === proNumber) {
-                    //const deliveryData = { stopNum: stopNum, delivery: delivery };
-                    setLoadingSession({
-                        ...loadingSession,
-                        activeDelivery: delivery
-                    });
-                    navigate(`/load/manifest/${delivery.proNumber}`/*, {state: deliveryData}*/ );
-                    return;
-                }
+    const handlePopupSubmit = (barcode: string) => {
+            console.log(barcode);
+            if (activeShipment !== undefined) {
+                console.log(`update records for ${activeShipment.mfstKey}`);
+                alert(`implement update of records for ${activeShipment.mfstKey}`)
+    
+                openPopup("unload_selection_success");
+                setTimeout(() => {
+                    setBarcode('');
+                    closePopup();
+                }, SUCCESS_WAIT);
+            } else {
+                //openPopup("unload__selection_fail");
+                console.error("update failed with undefined 'activeShipment'");
             }
         }
-        console.error(`delivery ${proNumber} was not found in delivery list...`);
-    };
 
     return (
         <div id="webpage">
-            {(loading || !undelivered || !delivered) ? ( <LoadingSpinner /> ) : (
+            {loading ? ( <LoadingSpinner /> ) : (
                 <>
                 <Header 
                     company={session.company ? session.company.split(' ') : ["Transportation", "Computer", "Support", "LLC."]}
                     title="Warehouse Service"
-                    subtitle="Delivery Manifest"
+                    subtitle="Unload/Load Guide"
                     currUser={session.username}
                     logoutButton={true}
                     root={false}
                 />
-                <ListWindow 
-                    mfstDate={loadingSession.mfstdate}
-                    powerUnit={loadingSession.powerunit}
-                    renderSubheader={true}
-                    status="Undelivered"
-                    deliveries={undelivered}
-                    selectDelivery={selectDelivery}
+                <BarcodeMenuWindow 
+                    prompt="Scan/Enter Trailer Barcode"
+                    barcode={barcode}
+                    setBarcode={setBarcode}
+                    handleSubmit={handleSubmit}
                 />
-                <ListWindow 
-                    mfstDate={undefined}
-                    powerUnit={undefined}
-                    renderSubheader={false}
-                    status="Delivered"
-                    deliveries={delivered}
-                    selectDelivery={selectDelivery}
-                />
-                <Footer
-                    classParam="loading_window_footer"
+                <Footer 
+                    classParam="landing_window_footer"
                 />
                 </>
             )}
+            <Popup 
+                popupType={popupType}
+                isVisible={popupVisible}
+                shipment={activeShipment}
+                barcode={barcode}
+                setBarcode={setBarcode}
+                closePopup={closePopup}
+                handleBarcodeSubmit={handlePopupSubmit}
+            />
         </div>
     )
 };

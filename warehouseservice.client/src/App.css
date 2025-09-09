@@ -5,13 +5,17 @@
     --success-primary-color: #63a35d;
     --success-secondary-color: #c0d6be;
     --success-pastel-color: #e8f7e7;
+    --error-color: red;
     --fail-primary-color: #c86b6b;
     --fail-secondary-color: #edcccc;
     --fail-pastel-color: #f4e4e4;
     --text-color: #353535;
+    --widget-color: #5e5e5e;
     --border-color: #353535;
     --maxWidgetWidth: 800px;
     --maxTableWidth: 1400px;
+    --box-shadow: rgba(0, 0, 0, 0.1);
+    --table-hover-color: #f3e0c1;
 }
 
 #root {
@@ -57,4 +61,69 @@ button {
     color: rgb(0, 0, 0);
     border-width: 1px;
     border-radius: 2px;
+}
+
+input[type="date"] {
+    background-color: white;
+    color: #000000;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+}
+input[type="date"]::-moz-calendar-picker-indicator {
+    display: none;
+}
+input[type="date"]::-ms-calendar-picker-indicator {
+    display: none;
+}
+
+.aria_fail_flag {
+    width: auto !important;
+    overflow: visible;
+    position: absolute;
+    top: 90% !important;
+    left: auto;
+    background-color: var(--fail-pastel-color);
+    color: var(--fail-primary-color);
+    border: 1px solid var(--fail-pastel-color);
+    border-radius: 4px;
+    padding: 10px 4px !important;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+}
+
+    .aria_fail_flag::before {
+        content: "";
+        position: absolute;
+        top: -18px;
+        left: 20%;
+        transform: translateX(-50%);
+        border-width: 10px;
+        border-style: solid;
+        border-color: transparent transparent var(--fail-pastel-color) transparent;
+        z-index: 11;
+    }
+
+    .aria_fail_flag.visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .aria_fail_flag p {
+        margin: 0;
+        font-size: small;
+    }
+
+input.invalid_input {
+    border: solid 1.5px var(--error-color);
+    border-radius: 3px; 
+    background-color: var(--fail-pastel-color);
+    transition: border-color 0.3s ease-in, background-color 0.3s ease-in;
 }

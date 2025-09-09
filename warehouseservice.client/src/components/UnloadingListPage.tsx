@@ -83,7 +83,7 @@ const UnloadingListPage: React.FC = () => {
                 barcode={barcode}
                 setBarcode={setBarcode}
                 closePopup={closePopup}
-                handleSubmit={handleSubmit}
+                handleBarcodeSubmit={handleSubmit}
             />
         </div>
     )
