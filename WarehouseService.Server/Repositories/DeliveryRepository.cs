@@ -40,6 +40,25 @@ namespace WarehouseService.Server.Repositories
             }
         }
 
+        public async Task<List<DB_Package>> GetPackagesByMfstKeyAsync(string mfstKey)
+        {
+            const string query = "SELECT * FROM dbo.TEMPDELIVERY WHERE MFSTKEY = @MfstKey;";
+            
+            using (var conn = new SqlConnection(_connString))
+            {
+                try
+                {
+                    var packages = await conn.QueryAsync<DB_Package>(query, new { MfstKey = mfstKey });
+                    return packages.ToList();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error retrieving packages for MFSTKEY: {mfstKey}", mfstKey);
+                    throw;
+                }
+            }
+        }
+
         public async Task<DB_Manifest?> GetFirstDeliveryManifestAsync(string companyConn, string powerunit, string manifestDate)
         {
             const string query = "SELECT * FROM dbo.DMFSTDAT WHERE MFSTDATE = @MfstDate AND POWERUNIT = @PowerUnit";

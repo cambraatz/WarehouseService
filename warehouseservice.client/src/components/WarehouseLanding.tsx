@@ -79,6 +79,7 @@ const WarehouseLanding: React.FC = () => {
                 console.log(data);
 
                 const username: string = data.user.Username;
+                const powerunit: string | undefined = data.user.Powerunit;
                 const companyMap: Record<string, string> = JSON.parse(data.mapping);
                 const companyName: string = companyMap[data.user.ActiveCompany];
                 const sessionId: string = data.sessionId;
@@ -88,7 +89,8 @@ const WarehouseLanding: React.FC = () => {
                     username: username,
                     id: Number(sessionId),
                     company: companyName,
-                })
+                    powerunit: powerunit,
+                });
 
                 setLoading(false);
                 return;
@@ -143,7 +145,7 @@ const WarehouseLanding: React.FC = () => {
                 popupType={popupType}
                 isVisible={popupVisible}
                 closePopup={closePopup}
-                handleSubmit={handleSubmit}
+                handleBarcodeSubmit={handleSubmit}
             />
         </div>
     )

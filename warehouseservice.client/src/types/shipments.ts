@@ -1,4 +1,4 @@
-export interface RawShipment {
+export interface Shipment {
     mfstKey: string;
     bolNumber: string;
     routeCode: string;

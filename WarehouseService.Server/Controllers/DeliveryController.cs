@@ -109,14 +109,14 @@ namespace WarehouseService.Server.Controllers
         }
 
 
-        // ["v1/deliveries/{bolNumber}"] fetches deliveries by bill of lading number...
-        [HttpGet("{bolNumber}")]
+        // ["v1/deliveries/bol/{bolNumber}"] fetches deliveries by bill of lading number...
+        [HttpGet("bol/{bolNumber}")]
         [Authorize]
-        public async Task<IActionResult> GetPackageList(string bolNumber)
+        public async Task<IActionResult> GetPackageListByBOL(string bolNumber)
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid input for BOL number: {BolNum}", bolNumber);
+                _logger.LogWarning("Invalid input for BOL number, fetching package list failed.");
                 return BadRequest(ModelState);
             }
 
@@ -126,7 +126,7 @@ namespace WarehouseService.Server.Controllers
                 if (packages == null || !packages.Any())
                 {
                     _logger.LogInformation("No deliveries found for BOL number: {BolNum}", bolNumber);
-                    return NotFound("No packages found for the provided bill of lading number.");
+                    return NotFound($"No packages found for the provided bill of lading number: {bolNumber}");
                 }
 
                 return Ok(packages);
@@ -134,6 +134,35 @@ namespace WarehouseService.Server.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching packages for BOL: {BolNumber}", bolNumber);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        // ["v1/deliveries/mfstkey/{mfstKey}"] fetches deliveries by manifest key...
+        [HttpGet("mfstkey/{mfstKey}")]
+        [Authorize]
+        public async Task<IActionResult> GetPackageListByMFSTKEY(string mfstKey)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid input for Manifest Key, fetching package list failed.");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var packages = await _deliveryService.GetPackagesByMfstKeyAsync(mfstKey);
+                if (packages == null || !packages.Any())
+                {
+                    _logger.LogInformation("No deliveries found for MFSTKEY: {mfstKey}", mfstKey);
+                    return NotFound($"No packages found for the provided manifest key: {mfstKey}");
+                }
+
+                return Ok(packages);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching packages for Manifest Key: {mfstKey}", mfstKey);
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }

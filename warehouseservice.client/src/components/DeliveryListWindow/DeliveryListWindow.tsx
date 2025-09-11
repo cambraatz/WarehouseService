@@ -1,12 +1,12 @@
 import React from 'react';
 import "./DeliveryListWindow.css";
 
-import type { RawShipment } from '../../types/shipments';
+import type { Shipment } from '../../types/shipments';
 
 // define prop interface...
 interface DeliveryListWindowProps {
-    shipment: RawShipment;
-    handleClick: (shipment: RawShipment) => void;
+    shipment: Shipment;
+    handleClick: (shipment: Shipment) => void;
 }
 
 const DeliveryListWindow: React.FC<DeliveryListWindowProps> = ({

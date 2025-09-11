@@ -2,6 +2,47 @@ label {
     font-size: 0.75em;
 }
 
+.warehouse_menu_div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 20% 5%;
+    padding: 1em 0;
+    border: solid 1px black;
+    border-radius: 0 0 5px 5px;
+    background-color: #e0eaf3;
+}
+
+.warehouse_menu_button {
+    width: 75%;
+    max-width: 230px;
+    padding-top: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.warehouse_menu_button:hover {
+    cursor: pointer;
+    background-color: var(--icon-hover-color);
+    transform: scale(1.05);
+    transition: all 0.5s;
+}
+
+.warehouse_menu_icon_div p {
+    margin: 1em 0.5em;
+    font-size: smaller;
+}
+
+.warehouse_menu_thumbnail {
+    width: auto;
+    height: 3em;
+    fill: var(--primary-color);
+}
+
 .warehouse_div {
     display: flex;
     flex-direction: column;
@@ -239,6 +280,9 @@ label {
 }
 
 @media only screen and (min-width: 630px) {
+    .warehouse_menu_button {
+        width: 50%;
+    }
     #widgetHeader,
     .ul_dv_fig {
         margin: 4% 20% 0;
@@ -254,6 +298,10 @@ label {
 }
 
 @media only screen and (min-width: 900px) {
+    .warehouse_menu_thumbnail {
+        height: 3em;
+    }
+
     #widgetHeader,
     .ul_dv_fig {
         margin: 4% 25% 0;
@@ -268,11 +316,24 @@ label {
     .ul_dv_fig {
         margin: 6% 30% 0;
     }
+
+    .warehouse_menu_button {
+        height: 100%;
+        margin: 0 1em;
+    }
+    .warehouse_menu_div {
+        flex-direction: row;
+        justify-content: center;
+    }
 }
 
 @media only screen and (min-width: 1600px) {
     .ul_dv_fig {
         margin: 4% auto;
         max-width: var(--maxWidgetWidth);
+    }
+
+    .warehouse_menu_icon_div p {
+        font-size: medium;
     }
 }

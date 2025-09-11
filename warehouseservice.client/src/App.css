@@ -16,6 +16,7 @@
     --maxTableWidth: 1400px;
     --box-shadow: rgba(0, 0, 0, 0.1);
     --table-hover-color: #f3e0c1;
+    --icon-hover-color: #f0f6fb;
 }
 
 #root {

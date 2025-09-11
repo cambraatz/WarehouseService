@@ -1,7 +1,9 @@
-import type { RawShipment } from "../../types/shipments";
+import type { Shipment } from "../../types/shipments";
 import type { Delivery } from "../../components/DeliveryManifest";
 import { getDate_Db } from "../helpers/dates";
 import { parseErrorMessage } from "./helpers/apiHelpers";
+import type { Session } from "../../contexts/AppContext";
+import { Logout } from "./sessions";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,9 +11,9 @@ interface ApiErrorResponse {
     message: string;
 }
 
-export const fetchUnloadPackages = async (bolNumber: string): Promise<RawShipment[]> => {
+export const fetchPackagesByBOL = async (bolNumber: string, session: Session): Promise<Shipment[]> => {
     try {
-        const response: Response = await fetch(`${API_URL}v1/deliveries/${bolNumber}`, {
+        const response: Response = await fetch(`${API_URL}v1/deliveries/bol/${bolNumber}`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json; charset=UTF-8'
@@ -27,14 +29,49 @@ export const fetchUnloadPackages = async (bolNumber: string): Promise<RawShipmen
             throw new Error(errorData.message || `Server error: ${response.status} ${response.statusText}`);
         }
 
-        const data: RawShipment[] = await response.json();
+        const data: Shipment[] = await response.json();
         console.log('Success:', data);
         return data;
     } catch (error: unknown) {
         if (error instanceof Error) {
             if (error.message.includes("Unauthorized")) {
-                alert("log out!!!");
-                //await Logout(session);
+                //alert("log out!!!");
+                await Logout(session);
+            }
+            console.error('Fetch error:', error.message);
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
+        return [];
+    }
+};
+
+export const fetchPackagesByMFSTKEY = async (mfstKey: string, session: Session): Promise<Shipment[]> => {
+    try {
+        const response: Response = await fetch(`${API_URL}v1/deliveries/mfstkey/${mfstKey}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                throw new Error("Unauthorized");
+            }
+            const errorDate: ApiErrorResponse = await response.json();
+            throw new Error(errorDate.message || `Server error: ${response.status} ${response.statusText}`);
+        }
+
+        const data: Shipment[] = await response.json();
+        console.log('Success:', data);
+        return data;
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            if (error.message.includes("Unauthorized")) {
+                //alert("logout!!!");
+                await Logout(session);
             }
             console.error('Fetch error:', error.message);
         } else {

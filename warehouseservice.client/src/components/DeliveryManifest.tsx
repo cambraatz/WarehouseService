@@ -7,10 +7,11 @@ import Popup from './Popup/Popup';
 import LoadingSpinner from './LoadingSpinner/LoadingSpinner';
 
 import { useAppContext } from '../contexts/AppContext';
-import {fetchDeliveryManifests, type Manifest }  from '../utils/api/deliveries';
+import {fetchDeliveryManifests, fetchPackagesByMFSTKEY, type Manifest }  from '../utils/api/deliveries';
 import { usePopup } from '../hooks/usePopup';
-import type { RawShipment } from '../types/shipments';
-import { SUCCESS_WAIT } from '../utils/helpers/macros';
+import type { Shipment } from '../types/shipments';
+import { FAIL_WAIT, SUCCESS_WAIT } from '../utils/helpers/macros';
+import { Logout } from '../utils/api/sessions';
 
 export interface Delivery {
     mfstKey: string;
@@ -48,7 +49,7 @@ export interface DeliveryManifestState {
 const DeliveryManifest: React.FC = () => {
     const {
         loading, setLoading,
-        session, /*setSession,*/
+        session, setSession,
         loadingSession, setLoadingSession
     } = useAppContext();
 
@@ -161,14 +162,46 @@ const DeliveryManifest: React.FC = () => {
         console.error(`delivery ${proNumber} was not found in delivery list...`);
     };
 
-    const handlePopupSubmit = (barcode: string) => {
-        console.log(barcode);
+    const getPackages = async (mfstKey: string): Promise<Shipment[]> => {
+        setLoading(true);
+        let packageList: Shipment[] = [];
+        try {
+            packageList = await fetchPackagesByMFSTKEY(mfstKey, session);
+        } catch (error: unknown) {
+            if (error instanceof Error && error.message === "Unauthorized") {
+                console.error("Session expired, logging out...");
+                openPopup("unauthorized");
+                setTimeout(async () => {
+                    await Logout(session);
+                }, FAIL_WAIT);
+            } else {
+                console.error("An unexpected error occurred: ", error);
+            }
+        } finally {
+            setLoading(false);
+        }
+        return packageList;
+    };
+
+    const handlePopupSubmit = async (trailerNum: string) => {
+        console.log(trailerNum);
         if (loadingSession.activeDelivery !== undefined) {
-            setLoadingSession({
-                ...loadingSession,
-                trailerCode: barcode
-            });
-            navigate(`/load/trailer/${loadingSession.activeDelivery.mfstKey}`);
+            const packageList: Shipment[] = await getPackages(loadingSession.activeDelivery.mfstKey);
+            if (packageList.length > 0) {
+                setSession({
+                    ...session,
+                    packageList: packageList
+                });
+                setLoadingSession({
+                    ...loadingSession,
+                    trailerCode: trailerNum
+                });
+                navigate(`/load/trailer/${loadingSession.activeDelivery.mfstKey}`);
+            } else {
+                console.error("package list was not found or is empty.");
+                // *** ADD ERROR STYLING TO BARCODE ENTRY WINDOW HERE *** ///
+                return;
+            }
         } else {
             //openPopup("unload__selection_fail");
             console.error("active delivery is needed to proceed!");

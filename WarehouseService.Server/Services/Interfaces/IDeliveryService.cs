@@ -6,6 +6,7 @@ namespace WarehouseService.Server.Services.Interfaces
     public interface IDeliveryService
     {
         Task<List<Package>> GetPackagesByBolAsync(string bolNumber);
+        Task<List<Package>> GetPackagesByMfstKeyAsync(string mfstKey);
         Task<DeliveryManifestResponse?> GetFirstDeliveryManifestAsync(string companyConn, string powerunit, string manifestDate);
         Task<DeliveryListResponse?> GetDeliveryManifestsAsync(string companyConn, string powerunit, string manifestDate);
     }

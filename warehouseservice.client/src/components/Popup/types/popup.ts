@@ -12,4 +12,5 @@ export type PopupType =
     | "unload_package_list"
     | "return" 
     | "logout"
-    | "fail";
+    | "fail"
+    | "unauthorized";

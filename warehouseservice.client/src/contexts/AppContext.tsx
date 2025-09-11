@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, createContext, useContext } from 'react';
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
-import type { RawShipment } from '../types/shipments';
+import type { Shipment } from '../types/shipments';
 import type { Delivery } from '../components/DeliveryManifest';
 //import type { Session, AppContextType } from './AppContext';
 //import { AppContext } from './AppContext';
@@ -13,7 +13,7 @@ export interface Session {
     company: string;
     mfstdate?: string;
     powerunit?: string;
-    packageList?: RawShipment[];
+    packageList?: Shipment[];
     //valid: boolean;
 };
 

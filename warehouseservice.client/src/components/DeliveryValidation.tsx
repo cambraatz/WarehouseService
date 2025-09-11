@@ -44,7 +44,7 @@ const DeliveryValidation: React.FC = () => {
 
     const [formData, setFormData] = useState<ValidationForm>({
         mfstdate: currDate,
-        powerunit: ""
+        powerunit: session.powerunit ? session.powerunit : ""
     });
 
     const DEFAULT_ERRORS = {

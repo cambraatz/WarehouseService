@@ -53,6 +53,37 @@ namespace WarehouseService.Server.Services
             return mappedPackages;
         }
 
+        public async Task<List<Package>> GetPackagesByMfstKeyAsync(string mfstKey)
+        {
+            if (string.IsNullOrWhiteSpace(mfstKey) || mfstKey.Length != 9)
+            {
+                return new List<Package>();
+            }
+
+            List<DB_Package> packages = await _deliveryRepo.GetPackagesByMfstKeyAsync(mfstKey);
+            List<Package> mappedPackages = packages.Select(p => new Package
+            {
+                mfstKey = p.MFSTKEY,
+                bolNumber = p.BOLNUM,
+                routeCode = p.ROUTECODE,
+                proNumber = p.PRONUM,
+                doorNumber = p.DOORNUM,
+                binNumber = p.BINNUM,
+                rollNumber = p.ROLLNUM,
+                terminal = p.TERMINAL,
+                shipper = p.SHIPNAME,
+                consName = p.CONSNAME,
+                consAdd1 = p.CONSADD1,
+                consAdd2 = p.CONSADD2,
+                productDesc = p.PRODUCTDESC,
+                weight = p.PRODUCTWEIGHT,
+                width = p.WIDTH,
+                height = p.HEIGHT
+            }).ToList();
+
+            return mappedPackages;
+        }
+
         public async Task<DeliveryManifestResponse?> GetFirstDeliveryManifestAsync(string companyConn, string powerunit, string manifestDate)
         {
             // reject improper parameter data...

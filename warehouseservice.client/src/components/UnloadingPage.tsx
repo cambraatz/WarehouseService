@@ -15,8 +15,8 @@ import { usePopup } from '../hooks/usePopup';
 //import type { PopupType } from './Popup/types/popup';
 import { SUCCESS_WAIT, FAIL_WAIT } from '../utils/helpers/macros';
 
-import { fetchUnloadPackages } from '../utils/api/deliveries';
-import type { RawShipment } from '../types/shipments';
+import { fetchPackagesByBOL } from '../utils/api/deliveries';
+import type { Shipment } from '../types/shipments';
 
 const UnloadingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -35,24 +35,26 @@ const UnloadingPage: React.FC = () => {
 
     //const DEFAULT_CODE: string = "XXX-XX-XXXX";
     const [barcode, setBarcode] = useState<string>('');
-    const [activeShipment, setActiveShipment] = useState<RawShipment | undefined>(undefined);
+    const [activeShipment, setActiveShipment] = useState<Shipment | undefined>(undefined);
     //const [packages, setPackages] = useState<RawShipment[]>();
 
-    async function getPackages(bol: string): Promise<RawShipment[]> {
+    async function getPackages(bol: string): Promise<Shipment[]> {
         setLoading(true);
-        let packageList: RawShipment[] = [];
+        let packageList: Shipment[] = [];
         try {
             const strippedCode = bol.replace(/-/g, '');
-            packageList = await fetchUnloadPackages(strippedCode, session);
+            packageList = await fetchPackagesByBOL(strippedCode, session);
         } catch (error: unknown) {
             if (error instanceof Error && error.message === "Unauthorized") {
                 console.error("Session expired, logging out...");
-                openPopup("unload_selection_fail");
+                //openPopup("unload_selection_fail");
+                openPopup("unauthorized");
                 setTimeout(async () => {
                     await Logout(session);
                 }, FAIL_WAIT);
             } else {
                 console.error("An unexpected error occurred: ", error);
+                openPopup("unload_selection_fail");
             }
         } finally {
             setLoading(false);
@@ -62,7 +64,7 @@ const UnloadingPage: React.FC = () => {
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
-        const packageList: RawShipment[] = await getPackages(barcode);
+        const packageList: Shipment[] = await getPackages(barcode);
         setSession({
             ...session,
             packageList: packageList

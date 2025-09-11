@@ -8,7 +8,7 @@ import Popup from './Popup/Popup';
 
 import { useAppContext } from '../contexts/AppContext';
 import { usePopup } from '../hooks/usePopup';
-import type { RawShipment } from '../types/shipments';
+import type { Shipment } from '../types/shipments';
 import { SUCCESS_WAIT } from '../utils/helpers/macros';
 
 const UnloadingListPage: React.FC = () => {
@@ -24,10 +24,10 @@ const UnloadingListPage: React.FC = () => {
     } = usePopup();
 
     //const [shipments,setShipments] = useState<RawShipment[]>(packageList);
-    const [activeShipment, setActiveShipment] = useState<RawShipment>();
+    const [activeShipment, setActiveShipment] = useState<Shipment>();
     const [barcode, setBarcode] = useState<string>('');
 
-    const handleClick = (shipment: RawShipment) => {
+    const handleClick = (shipment: Shipment) => {
         console.log(shipment.mfstKey);
         setActiveShipment(shipment);
         openPopup("unload_selection");
@@ -62,7 +62,7 @@ const UnloadingListPage: React.FC = () => {
                     logoutButton={true}
                     root={false}
                 />
-                {session.packageList && session.packageList.map((shipment: RawShipment) => {
+                {session.packageList && session.packageList.map((shipment: Shipment) => {
                     return (
                         <DeliveryListWindow 
                             key={shipment.mfstKey}

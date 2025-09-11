@@ -5,13 +5,13 @@ import BarCodeScan from '../../assets/BarcodeScan.png';
 import Success_Image from '../../assets/success.svg';
 import Fail_Image from '../../assets/error.svg';
 import './Popup.css';
-import type { RawShipment } from '../../types/shipments';
+import type { Shipment } from '../../types/shipments';
 import type { Delivery } from '../DeliveryManifest';
 
 interface PopupProps {
     popupType: PopupType;
     isVisible: boolean;
-    shipment?: RawShipment;
+    shipment?: Shipment;
     delivery?: Delivery;
     barcode?: string;
     setBarcode?: Dispatch<SetStateAction<string>>;
@@ -300,10 +300,17 @@ const Popup: React.FC<PopupProps> = ({
             )
         } else if (popupType === "fail") {
             return (
-                <div className="popupWarehouseWindow fail_popup">
+                <figure className="popup fail_popup">
                     <img id="fail" src={Fail_Image} alt="fail" />
                     <p>Oops! Something went wrong, logging out.</p>
-                </div>
+                </figure>
+            )
+        } else if (popupType === "unauthorized") {
+            return (
+                <figure className="popup unauth_popup">
+                    <img id="fail" src={Fail_Image} alt="fail" />
+                    <p>User authorization failed, logging out.</p>
+                </figure>
             )
         } /*else if (popupType === "success") {
             return (
@@ -318,12 +325,11 @@ const Popup: React.FC<PopupProps> = ({
     const overlayClass = isVisible ? 'overlay-visible' : 'overlay-hidden';
 
     let popupClass = "popupDefault";
-    if (popupType.includes("success")|| popupType.includes("fail")) {
-        
+    if (popupType.includes("success") || popupType.includes("fail") || popupType.includes("unauthorized")) {
         popupClass = popupType.includes("success") ? "popupSuccess" : "popupFail";
         return (
             <div id="popup_overlay" className={`overlay ${overlayClass}`}>
-                <div className={popupClass}>
+                <div className={`popup ${popupClass}`}>
                     {popupContent()}
                 </div>
             </div>
